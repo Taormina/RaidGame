@@ -14,6 +14,9 @@ def load_surf():
 	SCREENHEIGHT = 300
 	return pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
 
+def draw_tile(display, tile):
+	return pygame.draw.rect(display, tile.color, tile.rect)
+
 def main():
 	pygame.init()
 	DISPLAYSURF = load_surf()
@@ -27,11 +30,13 @@ def main():
 		bx = []
 		for y in range(WORLDWIDTH/TILESIZE):
 			bx.append(Tile(x, y, "blue", TILESIZE))
-			pygame.draw.rect(DISPLAYSURF, bx[-1].color, bx[-1].rect)
+			draw_tile(DISPLAYSURF, bx[-1])
 			test.append(bx[-1].rect)
 		BACKGROUND.append(bx)
 	player = Tile(3, 4, "red", TILESIZE)
-	pygame.draw.rect(DISPLAYSURF, player.color, player.rect)
+	BACKGROUND[5][10].color = pygame.Color("black")
+	draw_tile(DISPLAYSURF, BACKGROUND[5][10])
+	draw_tile(DISPLAYSURF, player)
 	pygame.display.update()
 	pygame.key.set_repeat(1,500)
 	prevdir = 275
@@ -63,16 +68,17 @@ def main():
 					changed_tiles += [player, BACKGROUND[player.rect.top/TILESIZE][player.rect.left/TILESIZE]]
 					player.rect.left -= 20
 					prevdir = 276
-				elif event.key == 32:
+				elif event.key == 32: #space bar
 					mods = hitbox[prevdir]
 					box = pygame.Rect(player.rect.left+mods[0], player.rect.top+mods[1], mods[2], mods[3])
 					hits = box.collidelistall(test)
 					for index in hits:
 						tile = BACKGROUND[index/20][index%20]
-						tile.color = pygame.Color("green")
-						changed_tiles.append(tile)
+						if tile.color == pygame.Color("black"):
+							tile.color = pygame.Color("green")
+							changed_tiles.append(tile)
 		for tile in changed_tiles:
-			pygame.draw.rect(DISPLAYSURF, tile.color, tile.rect)
+			draw_tile(DISPLAYSURF, tile)
 			changed_rects.append(tile.rect)
 		pygame.display.update(changed_rects)
 	
