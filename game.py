@@ -60,8 +60,8 @@ def main():
 			6: (1.5*TILESIZE, -TILESIZE/2, 2, TILESIZE*2),     #right
 			4: (-TILESIZE/2, -TILESIZE/2, 2, TILESIZE*2),      #left
 			1: (-TILESIZE/2, -TILESIZE/2, TILESIZE, TILESIZE), #up/left
-			3: (-TILESIZE/2, TILESIZE/2, TILESIZE, TILESIZE),  #up/right
-			7: (TILESIZE/2, -TILESIZE/2, TILESIZE, TILESIZE),  #down/left
+			7: (-TILESIZE/2, TILESIZE/2, TILESIZE, TILESIZE),  #up/right
+			3: (TILESIZE/2, -TILESIZE/2, TILESIZE, TILESIZE),  #down/left
 			9: (TILESIZE/2, TILESIZE/2, TILESIZE, TILESIZE) }  #down/right 
 	while True:  # main game loop
 		changed_tiles = []
@@ -89,8 +89,8 @@ def main():
 					if dr != 5:
 						mods = hitbox[dr]
 						box = pygame.Rect(player.rect.left+mods[0], player.rect.top+mods[1], mods[2], mods[3])
-			#			changed_rects.append(box)
-			#			pygame.draw.rect(DISPLAYSURF, pygame.Color("pink"), box)
+	#					changed_rects.append(box)
+	#					pygame.draw.rect(DISPLAYSURF, pygame.Color("pink"), box)
 						hits = box.collidelistall(test)
 						for index in hits:
 							tile = BACKGROUND[index/(WORLDWIDTH/TILESIZE)][index%(WORLDWIDTH/TILESIZE)]
