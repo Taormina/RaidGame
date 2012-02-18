@@ -17,10 +17,26 @@ def load_surf():
 def draw_tile(display, tile):
 	return pygame.draw.rect(display, tile.color, tile.rect)
 
+def mouse_dir(tile):
+	coord = pygame.mouse.get_pos()
+	if coord[0] < tile.rect.left:
+		dr = 1
+	elif coord[0] > tile.rect.right:
+		dr = 3
+	else:
+		dr = 2
+	if coord[1] < tile.rect.top:
+		dr += 0
+	elif coord[1] > tile.rect.bottom:
+		dr += 6
+	else:
+		dr += 3
+	return dr
+
 def main():
 	pygame.init()
 	DISPLAYSURF = load_surf()
-	TILESIZE = 25
+	TILESIZE = 20
 	WORLDWIDTH = 400
 	WORLDHEIGHT = 300
 	pygame.display.set_caption("Raid Game")
@@ -39,11 +55,14 @@ def main():
 	draw_tile(DISPLAYSURF, player)
 	pygame.display.update()
 	pygame.key.set_repeat(1,500)
-	hitbox = {	2: (-TILESIZE/2, -TILESIZE/2, TILESIZE*2, 2), #up 
-			7: (-TILESIZE/2, 1.5*TILESIZE, TILESIZE*2,  2), #down
-			4: (1.5*TILESIZE, -TILESIZE/2, 2, TILESIZE*2),  #right
-			5: (-TILESIZE/2, -TILESIZE/2, 2, TILESIZE*2)} #left
-	prevdir = 5
+	hitbox = {	2: (-TILESIZE/2, -TILESIZE/2, TILESIZE*2, 2),      #up 
+			8: (-TILESIZE/2, 1.5*TILESIZE, TILESIZE*2,  2),    #down
+			6: (1.5*TILESIZE, -TILESIZE/2, 2, TILESIZE*2),     #right
+			4: (-TILESIZE/2, -TILESIZE/2, 2, TILESIZE*2),      #left
+			1: (-TILESIZE/2, -TILESIZE/2, TILESIZE, TILESIZE), #up/left
+			3: (-TILESIZE/2, TILESIZE/2, TILESIZE, TILESIZE),  #up/right
+			7: (TILESIZE/2, -TILESIZE/2, TILESIZE, TILESIZE),  #down/left
+			9: (TILESIZE/2, TILESIZE/2, TILESIZE, TILESIZE) }  #down/right 
 	while True:  # main game loop
 		changed_tiles = []
 		changed_rects = []
@@ -55,31 +74,29 @@ def main():
 				if (event.key == 273 or event.key == 119) and player.rect.top: #up
 					changed_tiles += [player, BACKGROUND[player.rect.top/TILESIZE][player.rect.left/TILESIZE]]
 					player.rect.top -= TILESIZE
-					prevdir = 2
 				elif (event.key == 274 or event.key == 115) and player.rect.bottom != WORLDHEIGHT : #down
 					changed_tiles += [player, BACKGROUND[player.rect.top/TILESIZE][player.rect.left/TILESIZE]]
 					player.rect.top += TILESIZE
-					prevdir = 7
 				elif (event.key == 275 or event.key == 100) and player.rect.right != WORLDWIDTH: #right
 					changed_tiles += [player, BACKGROUND[player.rect.top/TILESIZE][player.rect.left/TILESIZE]]
 					player.rect.left += TILESIZE
-					prevdir = 4
 				elif (event.key == 276 or event.key == 97) and player.rect.left: #left
 					changed_tiles += [player, BACKGROUND[player.rect.top/TILESIZE][player.rect.left/TILESIZE]]
 					player.rect.left -= TILESIZE
-					prevdir = 5
 			elif  event.type == MOUSEBUTTONDOWN:
 				if event.button == 1: #left click
-					mods = hitbox[prevdir]
-					box = pygame.Rect(player.rect.left+mods[0], player.rect.top+mods[1], mods[2], mods[3])
-		#			changed_rects.append(box)
-		#			pygame.draw.rect(DISPLAYSURF, pygame.Color("pink"), box)
-					hits = box.collidelistall(test)
-					for index in hits:
-						tile = BACKGROUND[index/(WORLDWIDTH/TILESIZE)][index%(WORLDWIDTH/TILESIZE)]
-						if tile.color == pygame.Color("black"):
-							tile.color = pygame.Color("green")
-							changed_tiles.append(tile)
+					dr = mouse_dir(player)
+					if dr != 5:
+						mods = hitbox[dr]
+						box = pygame.Rect(player.rect.left+mods[0], player.rect.top+mods[1], mods[2], mods[3])
+			#			changed_rects.append(box)
+			#			pygame.draw.rect(DISPLAYSURF, pygame.Color("pink"), box)
+						hits = box.collidelistall(test)
+						for index in hits:
+							tile = BACKGROUND[index/(WORLDWIDTH/TILESIZE)][index%(WORLDWIDTH/TILESIZE)]
+							if tile.color == pygame.Color("black"):
+								tile.color = pygame.Color("green")
+								changed_tiles.append(tile)
 		for tile in changed_tiles:
 			draw_tile(DISPLAYSURF, tile)
 			changed_rects.append(tile.rect)
