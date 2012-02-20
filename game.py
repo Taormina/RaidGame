@@ -9,13 +9,8 @@ class Tile(object):
 	def __str__(self):
 		return "Player <" + self.rect.__str__() + " " +  self.color.__str__() + ">"
 
-def load_surf():
-	SCREENWIDTH = 400
-	SCREENHEIGHT = 300
-	return pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
-
-def draw_tile(display, tile):
-	return pygame.draw.rect(display, tile.color, tile.rect)
+def draw_tile(surf, tile):
+	return pygame.draw.rect(surf, tile.color, tile.rect)
 
 def mouse_dir(tile):
 	coord = pygame.mouse.get_pos()
@@ -35,26 +30,33 @@ def mouse_dir(tile):
 
 def main():
 	pygame.init()
-	DISPLAYSURF = load_surf()
+	SCREENWIDTH = 400
+	SCREENHEIGHT = 300
 	TILESIZE = 20
-	WORLDWIDTH = 400
-	WORLDHEIGHT = 300
+	WORLDWIDTH = 4000
+	WORLDHEIGHT = 3000
+	map_x = 0
+	map_y = 0
+	DISPLAYSURF = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
 	pygame.display.set_caption("Raid Game")
+	world = pygame.Surface((WORLDWIDTH, WORLDHEIGHT))
+	world = world.convert()
 	BACKGROUND = []
 	test = []
 	for x in range(WORLDHEIGHT/TILESIZE):
 		bx = []
 		for y in range(WORLDWIDTH/TILESIZE):
 			bx.append(Tile(x, y, "blue", TILESIZE))
-			draw_tile(DISPLAYSURF, bx[-1])
+			draw_tile(world, bx[-1])
 			test.append(bx[-1].rect)
 		BACKGROUND.append(bx)
 	player = Tile(3, 4, "red", TILESIZE)
 	BACKGROUND[5][10].color = pygame.Color("black")
-	draw_tile(DISPLAYSURF, BACKGROUND[5][10])
-	draw_tile(DISPLAYSURF, player)
-	pygame.display.update()
-	pygame.key.set_repeat(1,500)
+	draw_tile(world, BACKGROUND[5][10])
+	draw_tile(world, player)
+	DISPLAYSURF.blit(world, (map_x, map_y, SCREENWIDTH, SCREENHEIGHT))
+	pygame.display.flip()
+	pygame.key.set_repeat(1,100)
 	hitbox = {	2: (-TILESIZE/2, -TILESIZE/2, TILESIZE*2, 2),      #up 
 			8: (-TILESIZE/2, 1.5*TILESIZE, TILESIZE*2,  2),    #down
 			6: (1.5*TILESIZE, -TILESIZE/2, 2, TILESIZE*2),     #right
@@ -65,7 +67,6 @@ def main():
 			9: (TILESIZE/2, TILESIZE/2, TILESIZE, TILESIZE) }  #down/right 
 	while True:  # main game loop
 		changed_tiles = []
-		changed_rects = []
 		for event in pygame.event.get():
 			if event.type == QUIT:
 				pygame.quit()
@@ -74,15 +75,20 @@ def main():
 				if (event.key == 273 or event.key == 119) and player.rect.top: #up
 					changed_tiles += [player, BACKGROUND[player.rect.top/TILESIZE][player.rect.left/TILESIZE]]
 					player.rect.top -= TILESIZE
+					map_y += TILESIZE
 				elif (event.key == 274 or event.key == 115) and player.rect.bottom != WORLDHEIGHT : #down
 					changed_tiles += [player, BACKGROUND[player.rect.top/TILESIZE][player.rect.left/TILESIZE]]
 					player.rect.top += TILESIZE
+					map_y -= TILESIZE
 				elif (event.key == 275 or event.key == 100) and player.rect.right != WORLDWIDTH: #right
 					changed_tiles += [player, BACKGROUND[player.rect.top/TILESIZE][player.rect.left/TILESIZE]]
 					player.rect.left += TILESIZE
+					map_x -= TILESIZE
 				elif (event.key == 276 or event.key == 97) and player.rect.left: #left
 					changed_tiles += [player, BACKGROUND[player.rect.top/TILESIZE][player.rect.left/TILESIZE]]
 					player.rect.left -= TILESIZE
+					map_x += TILESIZE
+				print map_x, map_y
 			elif  event.type == MOUSEBUTTONDOWN:
 				if event.button == 1: #left click
 					dr = mouse_dir(player)
@@ -90,7 +96,7 @@ def main():
 						mods = hitbox[dr]
 						box = pygame.Rect(player.rect.left+mods[0], player.rect.top+mods[1], mods[2], mods[3])
 	#					changed_rects.append(box)
-	#					pygame.draw.rect(DISPLAYSURF, pygame.Color("pink"), box)
+	#					pygame.draw.rect(world, pygame.Color("pink"), box)
 						hits = box.collidelistall(test)
 						for index in hits:
 							tile = BACKGROUND[index/(WORLDWIDTH/TILESIZE)][index%(WORLDWIDTH/TILESIZE)]
@@ -98,8 +104,8 @@ def main():
 								tile.color = pygame.Color("green")
 								changed_tiles.append(tile)
 		for tile in changed_tiles:
-			draw_tile(DISPLAYSURF, tile)
-			changed_rects.append(tile.rect)
-		pygame.display.update(changed_rects)
+			draw_tile(world, tile)
+		DISPLAYSURF.blit(world, (map_x, map_y, SCREENWIDTH, SCREENHEIGHT))
+		pygame.display.flip()
 	
 main()
