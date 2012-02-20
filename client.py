@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, socket
 from pygame.locals import *
 
 
@@ -43,6 +43,12 @@ def main():
 	world = world.convert()
 	BACKGROUND = []
 	test = []
+
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect(("",3496))
+	s.shutdown(SHUT_RDWR)
+	s.close()
+
 	for x in range(WORLDHEIGHT/TILESIZE):
 		bx = []
 		for y in range(WORLDWIDTH/TILESIZE):
