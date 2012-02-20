@@ -12,8 +12,9 @@ class Tile(object):
 def draw_tile(surf, tile):
 	return pygame.draw.rect(surf, tile.color, tile.rect)
 
-def mouse_dir(tile):
+def mouse_dir(tile, x, y):
 	coord = pygame.mouse.get_pos()
+	coord = [coord[0]-x, coord[1]-y]
 	if coord[0] < tile.rect.left:
 		dr = 1
 	elif coord[0] > tile.rect.right:
@@ -46,7 +47,7 @@ def main():
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect(("",3496))
-	s.shutdown(SHUT_RDWR)
+	s.shutdown(socket.SHUT_RDWR)
 	s.close()
 
 	for x in range(WORLDHEIGHT/TILESIZE):
@@ -94,15 +95,13 @@ def main():
 					changed_tiles += [player, BACKGROUND[player.rect.top/TILESIZE][player.rect.left/TILESIZE]]
 					player.rect.left -= TILESIZE
 					map_x += TILESIZE
-				print map_x, map_y
 			elif  event.type == MOUSEBUTTONDOWN:
 				if event.button == 1: #left click
-					dr = mouse_dir(player)
+					dr = mouse_dir(player, map_x, map_y)
 					if dr != 5:
 						mods = hitbox[dr]
 						box = pygame.Rect(player.rect.left+mods[0], player.rect.top+mods[1], mods[2], mods[3])
-	#					changed_rects.append(box)
-	#					pygame.draw.rect(world, pygame.Color("pink"), box)
+					#	pygame.draw.rect(world, pygame.Color("pink"), box) # this is the line that makes hitboxes visible
 						hits = box.collidelistall(test)
 						for index in hits:
 							tile = BACKGROUND[index/(WORLDWIDTH/TILESIZE)][index%(WORLDWIDTH/TILESIZE)]
