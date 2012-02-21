@@ -1,4 +1,4 @@
-import socket
+from global_constants import *
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(("",3496)) # replace "" with socket.gethostname() to make public
